@@ -1,41 +1,41 @@
 import cv2
 from transformers import pipeline
 from PIL import Image
-#load hugging face model
- 
+# load  hugging face model
 emotion_pipeline = pipeline("image-classification", model="trpakov/vit-face-expression")
+
 #webcam
 cap = cv2.VideoCapture(0)
-facecasc =cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+facecasc = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 while True:
-    ret, frame =cap.read()
+    ret, frame = cap.read()
     if not ret:
         break
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3,minNeighbors=5)
-    for (x,y,w,h) in faces:
-        #draw face box
-        cv2.rectangle(frame,(x,y-50),(x+w, y+h+10),(255,0,0),2)
-        roi = frame[y:y+h,x:x+w]
-        roi_rgb = cv2.cvtColor(roi,cv2.COLOR_BGR2RGB)
+    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+    for (x, y, w, h) in faces:
+        #draw a face box
+        cv2.rectangle(frame, (x, y-50),(x+w, y+h+10),(255, 0, 0), 2)
+        #crop face
+        roi = frame[y:y+h, x:x+w]
+        roi_rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(roi_rgb)
-        #Run prediction with hugging face model
+        # run prediction with hugging face model
         preds = emotion_pipeline(pil_img)
         #get top prediction
         label = preds[0]["label"]
         score = preds[0]["score"]
+        
         #put label
-        cv2.putText(frame, f"{label} ({score:.2f})",(x,y-60),
-                    cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,255), 2,cv2.LINE_AA)
-    cv2.imshow("video",cv2.resize(frame, (1600,960),interpolation =cv2.INTER_CUBIC))
+        cv2.putText(frame, f"{label}({score:.2f})",(x, y-60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+    cv2.imshow("video", cv2.resize(frame, (1600,960), interpolation=cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 cap.release()
-cv2.destroyAllwindows()
-
-
-
-
+cv2.destroyAllWindows()
 
     
-       
+
+
+
